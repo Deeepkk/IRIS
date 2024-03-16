@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" href="index.css">
+	<title>IRIS</title>
+</head>
+
+<body class="bg-black text-white font-custom">
+	<div class="fixed top-0 left-0 w-full h-full bg-center bg-cover filter blur-md z-0"
+		style="background-image: url('/bg.jpg');">
+	</div>
+	<div class="relative z-10">
+		<header class="flex p-8 text-xl justify-between">
+			<span class="px-4 py-2">Player</span>
+			<span class="flex border border-gray-500 rounded-lg px-4 py-2">Deepak Kumar </span>
+		</header>
+		<div class="flex m-5 text-xl justify-between">
+			<p>Skill</p>
+			<span onclick="toggleAddSkill()">
+				<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+					fill="#fff">
+					<path d="M0 0h24v24H0z" fill="none" />
+					<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+				</svg>
+			</span>
+		</div>
+		<div id="addSkill" class="flex m-5 flex-col hidden">
+			<input class="text-black border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-500 w-full mb-4"
+				type="text" id="skillName">
+			<button onclick="createKey()">Add Skill</button>
+		</div>
+
+		<div id="skilllist">
+		</div>
+	</div>
+
+	<script>
+		function createKey() {
+			var skillName = document.getElementById("skillName").value;
+			if (skillName.trim() !== "") {
+				if (typeof (Storage) !== "undefined") {
+					localStorage.setItem(skillName, "0");
+					displaySkills(); // Update the displayed skills after adding a new one
+				}
+			}
+		}
+
+		function toggleAddSkill() {
+			var popup = document.getElementById("addSkill");
+			popup.classList.toggle("hidden");
+		}
+
+		function displaySkills() {
+			const skillList = document.getElementById('skilllist');
+			skillList.classList.add('border', 'border-gray-500', 'rounded-lg', 'p-0.5', 'm-5');
+			skillList.innerHTML = ''; // Clear existing content
+
+			// Get all keys from localStorage
+			const keys = Object.keys(localStorage);
+
+			keys.forEach(key => {
+				const value = localStorage.getItem(key);
+				const dividedValue = parseFloat(value) / 150;
+				const proeficiency = dividedValue.toFixed(1);
+				const skillDiv = document.createElement('div');
+				skillDiv.classList.add('flex', 'm-6');
+				skillDiv.innerHTML = `
+          <p class="cursor-pointer" onclick="showPopup('${key}')">${key}</p>
+          <p class="ml-2">(${proeficiency}%)</p>
+        `;
+				skillList.appendChild(skillDiv);
+			});
+		}
+
+		function showPopup(skillName) {
+			const popup = document.createElement('div');
+			popup.classList.add('popup', 'bg-black', 'p-4', 'rounded-lg', 'm-5', 'absolute', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'h-1/4', 'w-2/3', 'flex', 'flex-col', 'text-xl', 'justify-center', 'items-center', 'z-50', 'text-white');
+
+			//close button using svg
+			const closeButton = document.createElement('span');
+			closeButton.innerHTML = `
+	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#fff">
+	  <path d="M0 0h24v24H0z" fill="none"/>
+	  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+	</svg>
+      `;
+			closeButton.classList.add('absolute', 'top-2', 'right-2', 'cursor-pointer');
+			closeButton.onclick = function () {
+				popup.remove();
+			};
+
+			const studyButton = document.createElement('button');
+			studyButton.innerText = 'Study 1 hour';
+			studyButton.classList.add('mb-2');
+			studyButton.onclick = function () {
+				updateSkill(skillName, 10);
+				popup.remove();
+			};
+
+			const revisionButton = document.createElement('button');
+			revisionButton.innerText = 'Revision 1 hour';
+			revisionButton.classList.add('mb-2');
+			revisionButton.onclick = function () {
+				updateSkill(skillName, 5);
+				popup.remove();
+			};
+
+			const nothingButton = document.createElement('button');
+			nothingButton.innerText = 'Nothing';
+			nothingButton.classList.add('mb-2');
+			nothingButton.onclick = function () {
+				updateSkill(skillName, -30);
+				popup.remove();
+			};
+
+			popup.appendChild(studyButton);
+			popup.appendChild(revisionButton);
+			popup.appendChild(nothingButton);
+			popup.appendChild(closeButton);
+
+			document.body.appendChild(popup);
+		}
+
+		function updateSkill(skillName, value) {
+			let currentValue = parseFloat(localStorage.getItem(skillName));
+			if (!isNaN(currentValue)) {
+				currentValue += value;
+				localStorage.setItem(skillName, currentValue.toString());
+				displaySkills(); // Update displayed skills after updating localStorage
+			}
+		}
+		// Call the function initially to display existing data
+		displaySkills();
+
+		// Event listener for changes in localStorage
+		window.addEventListener('storage', displaySkills);
+	</script>
+</body>
+
+</html>
